@@ -2,6 +2,7 @@ import SwiftUI
 
 struct TodayWorkoutView: View {
     let split: WorkoutSplit
+    @Environment(\.dismiss) private var dismiss
     @StateObject private var viewModel = ExerciseListViewModel()
     @State private var selectedExercise: Exercise?
     
@@ -14,13 +15,18 @@ struct TodayWorkoutView: View {
             // Header with Muscle Focus
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text(SchedulerService.shared.getWeekdayName(for: effectiveDayIndex))
-                        .roundedFont(size: 14, weight: .bold)
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 5)
-                        .background(Theme.accent.opacity(0.2))
-                        .foregroundColor(Theme.accent)
-                        .cornerRadius(10)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(split.name)
+                            .roundedFont(size: 12, weight: .bold)
+                            .foregroundColor(Theme.accent)
+                        Text(SchedulerService.shared.getWeekdayName(for: effectiveDayIndex))
+                            .roundedFont(size: 14, weight: .bold)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 5)
+                            .background(Theme.accent.opacity(0.2))
+                            .foregroundColor(Theme.accent)
+                            .cornerRadius(10)
+                    }
                     Spacer()
                     if today?.isRestDay ?? true {
                         Text("Active Recovery")
@@ -122,6 +128,18 @@ struct TodayWorkoutView: View {
             }
         }
         .background(Theme.background.ignoresSafeArea())
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: { dismiss() }) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.left.arrow.right")
+                        Text("Switch Program")
+                            .roundedFont(size: 14, weight: .bold)
+                    }
+                    .foregroundColor(Theme.accent)
+                }
+            }
+        }
         .sheet(item: $selectedExercise) { exercise in
             ExerciseDetailView(exercise: exercise)
                 .presentationDetents([.medium, .large])

@@ -23,7 +23,7 @@ struct SplitSelectionView: View {
                                 Text("GymBuddy")
                                     .roundedFont(size: 28, weight: .bold)
                                     .foregroundColor(.white)
-                                Text("Select your training program")
+                                Text(activeSplit == nil ? "Ready to start your journey?" : "Welcome back, Athlete")
                                     .roundedFont(size: 14)
                                     .foregroundColor(.gray)
                             }
@@ -42,45 +42,55 @@ struct SplitSelectionView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Today's Suggestion Card
-                    if let activeSplit = splits.first(where: { $0.isActive }) {
-                        TodaySuggestionCard(split: activeSplit)
-                            .padding(.horizontal)
-                    }
-
-                    // Split Selection List
-                    VStack(alignment: .leading, spacing: 20) {
-                        Text("Training Programs")
-                            .roundedFont(size: 18, weight: .bold)
-                            .foregroundColor(.white)
-                            .padding(.horizontal)
-                        
-                        if splits.isEmpty {
-                            VStack(spacing: 20) {
-                                Image(systemName: "calendar.badge.plus")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(Theme.accent.opacity(0.5))
-                                Text("Building your programs...")
+                    if let activeSplit = activeSplit {
+                        // DASHBOARD MODE: Show today's suggestion for the ACTIVE split
+                        VStack(alignment: .leading, spacing: 24) {
+                            Text("Current Program")
+                                .roundedFont(size: 14, weight: .bold)
+                                .foregroundColor(Theme.accent)
+                                .padding(.horizontal)
+                            
+                            TodaySuggestionCard(split: activeSplit)
+                                .padding(.horizontal)
+                            
+                            Button(action: { switchToSelectionMode() }) {
+                                HStack {
+                                    Image(systemName: "arrow.left.arrow.right")
+                                    Text("Switch to another program")
+                                        .roundedFont(size: 14, weight: .bold)
+                                }
+                                .foregroundColor(.gray)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Theme.surface)
+                                .cornerRadius(16)
+                                .padding(.horizontal)
+                            }
+                        }
+                    } else {
+                        // SELECTION MODE: Show all training programs for the user to pick
+                        VStack(alignment: .leading, spacing: 20) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Choose Your Path")
+                                    .roundedFont(size: 22, weight: .bold)
+                                    .foregroundColor(.white)
+                                Text("Select a training split to activate your dashboard")
                                     .roundedFont(size: 14)
                                     .foregroundColor(.gray)
-                                ProgressView()
-                                    .tint(Theme.accent)
                             }
-                            .padding(40)
-                            .frame(maxWidth: .infinity)
-                            .background(Theme.surface)
-                            .cornerRadius(24)
                             .padding(.horizontal)
-                        } else {
-                            ForEach(splits) { split in
-                                Button(action: { 
-                                    selectAndNavigate(split)
-                                }) {
-                                    SplitCard(split: split, isActive: split.isActive)
+                            
+                            if splits.isEmpty {
+                                emptyStateView
+                            } else {
+                                ForEach(splits) { split in
+                                    Button(action: { activateSplit(split) }) {
+                                        SplitCard(split: split, isActive: false)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
                                 }
-                                .buttonStyle(PlainButtonStyle())
+                                .padding(.horizontal)
                             }
-                            .padding(.horizontal)
                         }
                     }
                     
@@ -104,20 +114,59 @@ struct SplitSelectionView: View {
         }
     }
     
+    private var activeSplit: WorkoutSplit? {
+        splits.first(where: { $0.isActive })
+    }
+    
+    private var emptyStateView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "calendar.badge.plus")
+                .font(.system(size: 48))
+                .foregroundColor(Theme.accent.opacity(0.5))
+            Text("Building your programs...")
+                .roundedFont(size: 14)
+                .foregroundColor(.gray)
+            ProgressView()
+                .tint(Theme.accent)
+        }
+        .padding(40)
+        .frame(maxWidth: .infinity)
+        .background(Theme.surface)
+        .cornerRadius(24)
+        .padding(.horizontal)
+    }
+    
     private func checkAndInitializeData() {
         if splits.isEmpty {
             modelContext.insert(SchedulerService.generateDefaultSplit())
             modelContext.insert(SchedulerService.generateFullBodyBeginner())
+            modelContext.insert(SchedulerService.generateUpperLower())
+            modelContext.insert(SchedulerService.generateBroSplit())
+            try? modelContext.save()
+        }
+    }
+    
+    private func activateSplit(_ split: WorkoutSplit) {
+        withAnimation {
+            for s in splits {
+                s.isActive = (s.id == split.id)
+            }
+            try? modelContext.save()
+        }
+    }
+    
+    private func switchToSelectionMode() {
+        withAnimation {
+            for s in splits {
+                s.isActive = false
+            }
             try? modelContext.save()
         }
     }
     
     private func selectAndNavigate(_ split: WorkoutSplit) {
         withAnimation {
-            for s in splits {
-                s.isActive = (s.id == split.id)
-            }
-            try? modelContext.save()
+            activateSplit(split)
             selectedSplit = split
         }
     }
@@ -164,6 +213,20 @@ struct TodaySuggestionCard: View {
             RoundedRectangle(cornerRadius: 24)
                 .stroke(Color.white.opacity(0.1), lineWidth: 1)
         )
+        .overlay(alignment: .topTrailing) {
+            if !isRestDay {
+                NavigationLink(destination: TodayWorkoutView(split: split)) {
+                    Text("Start")
+                        .roundedFont(size: 12, weight: .bold)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Theme.accent)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                        .padding(16)
+                }
+            }
+        }
     }
 }
 

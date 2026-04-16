@@ -184,6 +184,8 @@ struct SettingsView: View {
             for split in splits { modelContext.delete(split) }
             modelContext.insert(SchedulerService.generateDefaultSplit())
             modelContext.insert(SchedulerService.generateFullBodyBeginner())
+            modelContext.insert(SchedulerService.generateUpperLower())
+            modelContext.insert(SchedulerService.generateBroSplit())
             try? modelContext.save()
         }
     }

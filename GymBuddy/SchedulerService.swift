@@ -33,7 +33,7 @@ class SchedulerService {
     
     /// Pre-populates a default PPL-style split
     static func generateDefaultSplit() -> WorkoutSplit {
-        let ppl = WorkoutSplit(name: "GymBuddy PPL", isActive: true, difficulty: "Advanced")
+        let ppl = WorkoutSplit(name: "GymBuddy PPL", isActive: false, difficulty: "Advanced")
         ppl.days = [
             WorkoutDay(dayIndex: 1, targetMuscles: ["chest", "shoulders", "triceps"]), // Mon: Push
             WorkoutDay(dayIndex: 2, targetMuscles: ["middle back", "lats", "biceps"]), // Tue: Pull
@@ -58,5 +58,33 @@ class SchedulerService {
             WorkoutDay(dayIndex: 7, isRestDay: true) // Sun
         ]
         return fb
+    }
+    
+    static func generateUpperLower() -> WorkoutSplit {
+        let ul = WorkoutSplit(name: "Upper Lower Pro", isActive: false, difficulty: "Intermediate")
+        ul.days = [
+            WorkoutDay(dayIndex: 1, targetMuscles: ["chest", "middle back", "shoulders", "biceps", "triceps"]), // Mon: Upper
+            WorkoutDay(dayIndex: 2, targetMuscles: ["quadriceps", "hamstrings", "glutes", "calves"]), // Tue: Lower
+            WorkoutDay(dayIndex: 3, isRestDay: true), // Wed
+            WorkoutDay(dayIndex: 4, targetMuscles: ["chest", "lats", "shoulders", "biceps", "triceps"]), // Thu: Upper
+            WorkoutDay(dayIndex: 5, targetMuscles: ["quadriceps", "hamstrings", "glutes", "calves"]), // Fri: Lower
+            WorkoutDay(dayIndex: 6, isRestDay: true), // Sat
+            WorkoutDay(dayIndex: 7, isRestDay: true) // Sun
+        ]
+        return ul
+    }
+    
+    static func generateBroSplit() -> WorkoutSplit {
+        let bro = WorkoutSplit(name: "Classic Bro Split", isActive: false, difficulty: "Intermediate")
+        bro.days = [
+            WorkoutDay(dayIndex: 1, targetMuscles: ["chest"]), // Mon
+            WorkoutDay(dayIndex: 2, targetMuscles: ["middle back", "lats"]), // Tue
+            WorkoutDay(dayIndex: 3, targetMuscles: ["shoulders"]), // Wed
+            WorkoutDay(dayIndex: 4, targetMuscles: ["quadriceps", "hamstrings", "glutes"]), // Thu
+            WorkoutDay(dayIndex: 5, targetMuscles: ["biceps", "triceps"]), // Fri
+            WorkoutDay(dayIndex: 6, isRestDay: true), // Sat
+            WorkoutDay(dayIndex: 7, isRestDay: true) // Sun
+        ]
+        return bro
     }
 }
