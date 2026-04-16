@@ -89,7 +89,7 @@ struct TodayWorkoutView: View {
                     
                     // Start Button
                     NavigationLink(destination: WorkoutTimerView(exercises: viewModel.exercises, splitId: split.id, dayIndex: effectiveDayIndex)) {
-                        PremiumButton(title: "Start Workout", icon: "timer") { }
+                        PremiumLabel(title: "Start Workout", icon: "timer")
                             .padding()
                     }
                 }

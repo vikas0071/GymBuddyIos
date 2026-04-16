@@ -1,5 +1,26 @@
 import SwiftUI
 
+struct PremiumButtonStyle: View {
+    var title: String
+    var icon: String? = nil
+    
+    var body: some View {
+        HStack {
+            if let icon = icon {
+                Image(systemName: icon)
+            }
+            Text(title)
+                .roundedFont(size: 18, weight: .bold)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Theme.accent)
+        .foregroundColor(.white)
+        .cornerRadius(Theme.cornerRadius)
+        .shadow(color: Theme.accent.opacity(0.3), radius: 10, x: 0, y: 5)
+    }
+}
+
 struct PremiumButton: View {
     var title: String
     var icon: String? = nil
@@ -7,20 +28,17 @@ struct PremiumButton: View {
     
     var body: some View {
         Button(action: action) {
-            HStack {
-                if let icon = icon {
-                    Image(systemName: icon)
-                }
-                Text(title)
-                    .roundedFont(size: 18, weight: .bold)
-            }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Theme.accent)
-            .foregroundColor(.white)
-            .cornerRadius(Theme.cornerRadius)
-            .shadow(color: Theme.accent.opacity(0.3), radius: 10, x: 0, y: 5)
+            PremiumButtonStyle(title: title, icon: icon)
         }
+    }
+}
+
+struct PremiumLabel: View {
+    var title: String
+    var icon: String? = nil
+    
+    var body: some View {
+        PremiumButtonStyle(title: title, icon: icon)
     }
 }
 
