@@ -6,6 +6,7 @@ struct WorkoutTimerView: View {
     @Environment(\.dismiss) private var dismiss
     
     @StateObject private var viewModel: WorkoutViewModel
+    @State private var showingDetail = false
     
     init(exercises: [Exercise], splitId: UUID, dayIndex: Int) {
         // We initialize the ViewModel with the parameters
@@ -34,14 +35,22 @@ struct WorkoutTimerView: View {
                 VStack(spacing: 32) {
                     // Progress Header
                     HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Exercise \(viewModel.currentExerciseIndex + 1) of \(viewModel.totalExercisesCount)")
-                                .roundedFont(size: 14)
-                                .foregroundColor(.gray)
-                            Text(viewModel.currentExercise.name)
-                                .roundedFont(size: 24, weight: .bold)
-                                .foregroundColor(.white)
-                                .lineLimit(1)
+                        HStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Exercise \(viewModel.currentExerciseIndex + 1) of \(viewModel.totalExercisesCount)")
+                                    .roundedFont(size: 14)
+                                    .foregroundColor(.gray)
+                                Text(viewModel.currentExercise.name)
+                                    .roundedFont(size: 24, weight: .bold)
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+                            }
+                            
+                            Button(action: { showingDetail = true }) {
+                                Image(systemName: "info.circle.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(Theme.accent.opacity(0.8))
+                            }
                         }
                         Spacer()
                         Text("Set \(viewModel.currentSet)/\(viewModel.totalSets)")
@@ -49,6 +58,13 @@ struct WorkoutTimerView: View {
                             .foregroundColor(Theme.accent)
                     }
                     .padding(.horizontal)
+                    
+                    // Exercise Image Preview
+                    ExerciseImageView(imagePath: viewModel.currentExercise.images.first)
+                        .frame(height: 140)
+                        .cornerRadius(20)
+                        .padding(.horizontal)
+                        .shadow(color: Color.black.opacity(0.3), radius: 10, x: 0, y: 5)
                     
                     Spacer()
                     
@@ -110,13 +126,13 @@ struct WorkoutTimerView: View {
         }
         .navigationBarBackButtonHidden(true)
         .onAppear {
-            // Set the model context here using a private method or by exposing a property
-            // For simplicity, we'll use a hack or just ensure the VM has access to context.
-            // In a real app, you might use a Repository pattern.
-            // Here we'll just use the context we have in the view.
-            // I'll add a helper to update context in VM.
             viewModel.updateModelContext(modelContext)
             viewModel.startWorkout()
+        }
+        .sheet(isPresented: $showingDetail) {
+            ExerciseDetailView(exercise: viewModel.currentExercise)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
         }
     }
 }
