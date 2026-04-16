@@ -1,61 +1,46 @@
-//
-//  ContentView.swift
-//  GymBuddy
-//
-//  Created by Vikas Bishnoi on 16/04/26.
-//
-
 import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @State private var isSplashActive = true
+    @State private var opacity = 0.5
+    @State private var size = 0.8
+    
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        if isSplashActive {
+            ZStack {
+                Theme.background.ignoresSafeArea()
+                
+                VStack(spacing: 20) {
+                    Image(systemName: "bolt.fill")
+                        .font(.system(size: 80))
+                        .foregroundColor(Theme.accent)
+                    
+                    Text("GymBuddy")
+                        .roundedFont(size: 32, weight: .bold)
+                        .foregroundColor(.white)
+                }
+                .scaleEffect(size)
+                .opacity(opacity)
+                .onAppear {
+                    withAnimation(.easeIn(duration: 0.8)) {
+                        self.size = 1.0
+                        self.opacity = 1.0
                     }
                 }
-                .onDelete(perform: deleteItems)
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                    withAnimation {
+                        self.isSplashActive = false
                     }
                 }
             }
-        } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+        } else {
+            NavigationStack {
+                SplitSelectionView()
+                    .navigationBarTitleDisplayMode(.inline)
             }
         }
     }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }

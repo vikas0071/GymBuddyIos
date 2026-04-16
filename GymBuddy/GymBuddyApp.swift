@@ -1,10 +1,3 @@
-//
-//  GymBuddyApp.swift
-//  GymBuddy
-//
-//  Created by Vikas Bishnoi on 16/04/26.
-//
-
 import SwiftUI
 import SwiftData
 
@@ -12,7 +5,9 @@ import SwiftData
 struct GymBuddyApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            WorkoutSplit.self,
+            WorkoutDay.self,
+            WorkoutLog.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -26,6 +21,8 @@ struct GymBuddyApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(ExerciseManager.shared)
+                .preferredColorScheme(.dark)
         }
         .modelContainer(sharedModelContainer)
     }
