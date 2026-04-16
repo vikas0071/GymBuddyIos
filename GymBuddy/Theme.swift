@@ -4,6 +4,7 @@ enum Theme {
     static let background = Color(hex: "000000")
     static let surface = Color(hex: "121212")
     static let accent = Color(hex: "3B5BFC")
+    static let secondary = Color.gray.opacity(0.6)
     static let textPrimary = Color.white
     static let textSecondary = Color.gray
     static let cornerRadius: CGFloat = 24

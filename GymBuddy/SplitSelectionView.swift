@@ -15,7 +15,7 @@ struct SplitSelectionView: View {
             Theme.background.ignoresSafeArea()
             
             ScrollView {
-                VStack(alignment: .leading, spacing: 32) {
+                    VStack(alignment: .leading, spacing: 32) {
                     // Header with Stats
                     VStack(alignment: .leading, spacing: 16) {
                         HStack {
@@ -34,6 +34,10 @@ struct SplitSelectionView: View {
                                     .foregroundColor(Theme.accent)
                             }
                         }
+                        
+                        // Weekly Activity Tracker
+                        WeeklyActivityBar(logs: logs)
+                            .padding(.top, 8)
                         
                         HStack(spacing: 16) {
                             StatCard(title: "Total Workouts", value: "\(viewModel.totalWorkouts)", icon: "figure.strengthtraining.traditional")
@@ -101,16 +105,16 @@ struct SplitSelectionView: View {
                 }
                 .padding(.vertical)
             }
-        }
-        .navigationDestination(item: $selectedSplit) { split in
-            TodayWorkoutView(split: split)
-        }
-        .onAppear {
-            checkAndInitializeData()
-            viewModel.update(from: splits, logs: logs)
-        }
-        .sheet(isPresented: $showingSettings) {
-            SettingsView()
+            .navigationDestination(item: $selectedSplit) { split in
+                TodayWorkoutView(split: split)
+            }
+            .onAppear {
+                checkAndInitializeData()
+                viewModel.update(from: splits, logs: logs)
+            }
+            .sheet(isPresented: $showingSettings) {
+                SettingsView()
+            }
         }
     }
     
