@@ -9,6 +9,9 @@ struct SettingsView: View {
     
     @AppStorage("isDarkMode") private var isDarkMode = true
     @AppStorage("useMetric") private var useMetric = true
+    @StateObject private var viewModel = SettingsViewModel()
+    @State private var showingResetConfirmation = false
+    @State private var showingClearHistoryConfirmation = false
     
     @State private var quote = "The only bad workout is the one that didn't happen."
     
@@ -102,7 +105,7 @@ struct SettingsView: View {
                                     .roundedFont(size: 14, weight: .bold)
                                     .foregroundColor(Theme.accent)
                                 Spacer()
-                                Button(action: resetToDefault) {
+                                Button(action: { viewModel.resetToDefault(splits: splits, context: modelContext) }) {
                                     Text("Reset Programs")
                                         .roundedFont(size: 12)
                                         .foregroundColor(.gray)
@@ -110,13 +113,13 @@ struct SettingsView: View {
                             }
                             
                             ForEach(splits) { split in
-                                Button(action: { selectSplit(split) }) {
+                                Button(action: { viewModel.selectSplit(split, in: splits, context: modelContext) }) {
                                     HStack {
                                         VStack(alignment: .leading, spacing: 4) {
                                             Text(split.name)
                                                 .roundedFont(size: 16, weight: .bold)
                                                 .foregroundColor(.white)
-                                            Text("\(split.safeDifficulty) • \(split.days.count) Days")
+                                            Text("\(split.days.count) days")
                                                 .roundedFont(size: 12)
                                                 .foregroundColor(.gray)
                                         }
@@ -126,10 +129,11 @@ struct SettingsView: View {
                                                 .foregroundColor(Theme.accent)
                                         }
                                     }
-                                    .padding()
-                                    .background(Theme.surface)
-                                    .cornerRadius(20)
+                                    .padding(.vertical, 8)
                                 }
+                                .padding()
+                                .background(Theme.surface)
+                                .cornerRadius(20)
                             }
                         }
                         
@@ -167,26 +171,6 @@ struct SettingsView: View {
                 }
             }
             .preferredColorScheme(isDarkMode ? .dark : .light)
-        }
-    }
-    
-    private func selectSplit(_ selectedSplit: WorkoutSplit) {
-        withAnimation {
-            for split in splits {
-                split.isActive = (split.id == selectedSplit.id)
-            }
-            try? modelContext.save()
-        }
-    }
-    
-    private func resetToDefault() {
-        withAnimation {
-            for split in splits { modelContext.delete(split) }
-            modelContext.insert(SchedulerService.generateDefaultSplit())
-            modelContext.insert(SchedulerService.generateFullBodyBeginner())
-            modelContext.insert(SchedulerService.generateUpperLower())
-            modelContext.insert(SchedulerService.generateBroSplit())
-            try? modelContext.save()
         }
     }
 }

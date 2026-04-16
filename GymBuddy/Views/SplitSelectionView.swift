@@ -57,7 +57,7 @@ struct SplitSelectionView: View {
                             TodaySuggestionCard(split: activeSplit)
                                 .padding(.horizontal)
                             
-                            Button(action: { switchToSelectionMode() }) {
+                            Button(action: { viewModel.switchToSelectionMode(in: splits, context: modelContext) }) {
                                 HStack {
                                     Image(systemName: "arrow.left.arrow.right")
                                     Text("Switch to another program")
@@ -84,17 +84,17 @@ struct SplitSelectionView: View {
                             }
                             .padding(.horizontal)
                             
-                            if splits.isEmpty {
-                                emptyStateView
-                            } else {
-                                ForEach(splits) { split in
-                                    Button(action: { activateSplit(split) }) {
-                                        SplitCard(split: split, isActive: false)
+                                if splits.isEmpty {
+                                    emptyStateView
+                                } else {
+                                    ForEach(splits) { split in
+                                        Button(action: { viewModel.activateSplit(split, in: splits, context: modelContext) }) {
+                                            SplitCard(split: split, isActive: false)
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
                                     }
-                                    .buttonStyle(PlainButtonStyle())
+                                    .padding(.horizontal)
                                 }
-                                .padding(.horizontal)
-                            }
                         }
                     }
                     
@@ -109,7 +109,7 @@ struct SplitSelectionView: View {
                 TodayWorkoutView(split: split)
             }
             .onAppear {
-                checkAndInitializeData()
+                viewModel.ensureDataInitialized(splits: splits, context: modelContext)
                 viewModel.update(from: splits, logs: logs)
             }
             .sheet(isPresented: $showingSettings) {
@@ -140,37 +140,9 @@ struct SplitSelectionView: View {
         .padding(.horizontal)
     }
     
-    private func checkAndInitializeData() {
-        if splits.isEmpty {
-            modelContext.insert(SchedulerService.generateDefaultSplit())
-            modelContext.insert(SchedulerService.generateFullBodyBeginner())
-            modelContext.insert(SchedulerService.generateUpperLower())
-            modelContext.insert(SchedulerService.generateBroSplit())
-            try? modelContext.save()
-        }
-    }
-    
-    private func activateSplit(_ split: WorkoutSplit) {
-        withAnimation {
-            for s in splits {
-                s.isActive = (s.id == split.id)
-            }
-            try? modelContext.save()
-        }
-    }
-    
-    private func switchToSelectionMode() {
-        withAnimation {
-            for s in splits {
-                s.isActive = false
-            }
-            try? modelContext.save()
-        }
-    }
-    
     private func selectAndNavigate(_ split: WorkoutSplit) {
         withAnimation {
-            activateSplit(split)
+            viewModel.activateSplit(split, in: splits, context: modelContext)
             selectedSplit = split
         }
     }
